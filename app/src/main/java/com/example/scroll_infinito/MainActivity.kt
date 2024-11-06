@@ -68,13 +68,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Añade una nueva tarea a la lista si el campo de texto no está vacío.
+     * Muestra un error y reproduce un sonido si el campo está vacío.
+     * Si se añade exitosamente, limpia el campo de texto y reproduce un sonido de confirmación.
+     */
     private fun addTask() {
-        val taskToAdd: String = etTask.text.toString() // Obtener el texto de la tarea
-        if (taskToAdd.isNotEmpty()) { // Verificar que el campo no esté vacío
-            tasks.add(taskToAdd) // Añadir la nueva tarea a la lista
-            prefs.saveTasks(tasks) // Guardar la lista actualizada
-            adapter.notifyDataSetChanged() // Notificar al adaptador que los datos han cambiado
-            etTask.setText("") // Limpiar el campo de texto
+        val newTask = etTask.text.toString()
+        if (newTask.isEmpty()) {
+            etTask.error = "Escribe una tarea!"
+        } else {
+            tasks.add(newTask)
+            prefs.saveTasks(tasks)
+            adapter.notifyDataSetChanged()
+            etTask.setText("")
         }
     }
 
