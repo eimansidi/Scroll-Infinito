@@ -2,21 +2,15 @@ package com.example.scroll_infinito
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
-import android.graphics.Canvas
 import android.graphics.Color
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Canvas
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.Adapter
 import com.example.scroll_infinito.TaskApplication.Companion.prefs
 
 class MainActivity : AppCompatActivity() {
