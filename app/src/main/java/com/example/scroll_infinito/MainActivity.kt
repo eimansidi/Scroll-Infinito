@@ -15,47 +15,72 @@ import com.example.scroll_infinito.TaskApplication.Companion.prefs
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var btnAddTask:Button
-    lateinit var etTask:EditText
-    lateinit var rvTasks:RecyclerView
+    lateinit var btnAddTask: Button
+    lateinit var etTask: EditText
+    lateinit var rvTasks: RecyclerView
 
     lateinit var mediaPlayer: MediaPlayer // Declarar el MediaPlayer para reproducir sonidos
 
-    lateinit var adapter:TaskAdapter
+    lateinit var adapter: TaskAdapter
 
     var tasks = mutableListOf<String>()
 
+    /**
+     * Método llamado al crear la actividad.
+     * Inicializa la interfaz de usuario y el MediaPlayer para los sonidos.
+     *
+     * @param savedInstanceState El estado de la instancia guardada.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        initUi()
-        attachSwipeToDelete()
-        mediaPlayer = MediaPlayer.create(this, R.raw.delete_sound)
+        initUi() // Inicializa la UI
+        attachSwipeToDelete() // Configura el swipe para eliminar
+        mediaPlayer = MediaPlayer.create(this, R.raw.delete_sound) // Configura el sonido
     }
 
+    /**
+     * Inicializa los componentes de la interfaz de usuario.
+     * Llama a las funciones para inicializar vistas, listeners y RecyclerView.
+     */
     private fun initUi() {
-        initView()
-        initListeners()
-        initRecyclerView()
+        initView() // Inicializa las vistas
+        initListeners() // Inicializa los listeners
+        initRecyclerView() // Configura el RecyclerView
     }
 
+    /**
+     * Configura el RecyclerView con el adaptador y la lista de tareas guardadas.
+     */
     private fun initRecyclerView() {
-        tasks = prefs.getTasks()
-        rvTasks.layoutManager = LinearLayoutManager(this)
-        adapter = TaskAdapter(tasks) { deleteTask(it) }
-        rvTasks.adapter = adapter
+        tasks = prefs.getTasks() // Obtiene las tareas guardadas
+        rvTasks.layoutManager = LinearLayoutManager(this) // Establece el layout
+        adapter = TaskAdapter(tasks) { deleteTask(it) } // Inicializa el adaptador con callback
+        rvTasks.adapter = adapter // Asigna el adaptador al RecyclerView
     }
 
-    private fun deleteTask(position:Int) {
-        tasks.removeAt(position)
-        adapter.notifyDataSetChanged()
-        prefs.saveTasks(tasks)
-        mediaPlayer.start()
+    /**
+     * Elimina una tarea de la lista en la posición especificada.
+     * Guarda la lista de tareas y reproduce un sonido de eliminación.
+     *
+     * @param position La posición de la tarea a eliminar.
+     */
+    private fun deleteTask(position: Int) {
+        tasks.removeAt(position) // Elimina la tarea en la posición dada
+        adapter.notifyDataSetChanged() // Notifica el cambio al adaptador
+        prefs.saveTasks(tasks) // Guarda la lista actualizada
+        mediaPlayer.start() // Reproduce el sonido de eliminación
     }
 
+    /**
+     * Inicializa los listeners de la interfaz de usuario.
+     * Configura el botón de añadir tarea y su animación al hacer clic.
+     */
     private fun initListeners() {
-        btnAddTask.setOnClickListener{
-            addTask()
+        btnAddTask.setOnClickListener {
+            addTask() // Llama a la función para añadir tarea
+
+            // Crea animación de "pulso" en el botón de añadir tarea
             val pulse = ObjectAnimator.ofPropertyValuesHolder(
                 btnAddTask,
                 PropertyValuesHolder.ofFloat("scaleX", 1.1f),
@@ -70,38 +95,39 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Añade una nueva tarea a la lista si el campo de texto no está vacío.
-     * Muestra un error y reproduce un sonido si el campo está vacío.
-     * Si se añade exitosamente, limpia el campo de texto y reproduce un sonido de confirmación.
+     * Muestra un error si el campo está vacío y limpia el campo tras añadir la tarea.
      */
     private fun addTask() {
         val newTask = etTask.text.toString()
         if (newTask.isEmpty()) {
-            etTask.error = "Escribe una tarea!"
+            etTask.error = "Escribe una tarea!" // Muestra un mensaje de error
         } else {
-            tasks.add(newTask)
-            prefs.saveTasks(tasks)
-            adapter.notifyDataSetChanged()
-            etTask.setText("")
+            tasks.add(newTask) // Añade la nueva tarea a la lista
+            prefs.saveTasks(tasks) // Guarda la lista actualizada
+            adapter.notifyDataSetChanged() // Actualiza el adaptador
+            etTask.setText("") // Limpia el campo de texto
         }
     }
 
+    /**
+     * Asocia las vistas de la interfaz a las variables.
+     */
     private fun initView() {
         btnAddTask = findViewById(R.id.btnAddTask)
         etTask = findViewById(R.id.etTask)
         rvTasks = findViewById(R.id.rvTasks)
     }
 
+    /**
+     * Configura el gesto de deslizar para eliminar elementos del RecyclerView.
+     * Aplica un fondo rojo durante el deslizamiento y elimina la tarea al finalizar.
+     */
     private fun attachSwipeToDelete() {
         val itemTouchHelper = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 
             /**
-             * Metodo que maneja el movimiento de un elemento dentro del RecyclerView.
+             * Método que maneja el movimiento de un elemento dentro del RecyclerView.
              * En este caso, no se utiliza, así que devuelve false.
-             *
-             * @param recyclerView El RecyclerView donde ocurre el movimiento.
-             * @param viewHolder El ViewHolder del elemento que se está moviendo.
-             * @param target El ViewHolder del elemento objetivo donde se está moviendo.
-             * @return false porque no se usa el movimiento.
              */
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -112,16 +138,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             /**
-             * Metodo que se llama para dibujar el ítem mientras se desliza.
-             * Cambia el color del fondo del ítem a rojo mientras se desliza.
-             *
-             * @param c Canvas donde se dibuja el RecyclerView.
-             * @param recyclerView El RecyclerView.
-             * @param viewHolder El ViewHolder del ítem que se desliza.
-             * @param dX Desplazamiento en X durante el deslizamiento.
-             * @param dY Desplazamiento en Y durante el deslizamiento.
-             * @param actionState Estado actual del gesto (deslizar, arrastrar, etc.).
-             * @param isCurrentlyActive Indica si el gesto está activo.
+             * Cambia el color de fondo del ítem a rojo mientras se desliza.
              */
             override fun onChildDraw(
                 c: android.graphics.Canvas,
@@ -133,40 +150,28 @@ class MainActivity : AppCompatActivity() {
                 isCurrentlyActive: Boolean
             ) {
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                    val itemView = viewHolder.itemView // Obtiene la vista del ítem
-
-                    // Cambia el color del fondo del ítem a rojo mientras se desliza
-                    itemView.setBackgroundColor(Color.RED)
-
-                    // Aplica la traducción en X para el desplazamiento
-                    itemView.translationX = dX
+                    val itemView = viewHolder.itemView
+                    itemView.setBackgroundColor(Color.RED) // Fondo rojo al deslizar
+                    itemView.translationX = dX // Aplica el desplazamiento en X
                 }
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
 
             /**
-             * Metodo que se llama cuando un ítem ha sido deslizado.
-             * Llama a la función de eliminación después del deslizamiento.
-             *
-             * @param viewHolder El ViewHolder que fue deslizado.
-             * @param direction La dirección en la que se deslizó (izquierda o derecha).
+             * Método que se llama cuando un ítem ha sido deslizado.
+             * Elimina la tarea en la posición del ViewHolder deslizado.
              */
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition // Obtiene la posición del ítem deslizado
-                deleteTask(position) // Llama a la función de eliminación
+                val position = viewHolder.adapterPosition // Obtiene la posición
+                deleteTask(position) // Elimina la tarea
             }
 
             /**
-             * Metodo que se llama para limpiar la vista del ítem después de que se ha deslizado.
-             * Restablece el color de fondo al original.
-             *
-             * @param recyclerView El RecyclerView donde se encuentra el ítem.
-             * @param viewHolder El ViewHolder del ítem que fue deslizado.
+             * Restaura el color de fondo original del ítem tras finalizar el deslizamiento.
              */
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
-                // Restablece el color de fondo al original después de que el usuario deja de deslizar
-                viewHolder.itemView.setBackgroundColor(Color.TRANSPARENT)
+                viewHolder.itemView.setBackgroundColor(Color.TRANSPARENT) // Restablece el color original
             }
         }
 
@@ -175,13 +180,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Se llama cuando la actividad se destruye.
+     * Método llamado al destruir la actividad.
      * Libera los recursos utilizados por el MediaPlayer.
      */
     override fun onDestroy() {
         super.onDestroy()
-        // Liberar el MediaPlayer cuando la actividad se destruya
-        mediaPlayer.release()
+        mediaPlayer.release() // Libera el MediaPlayer
     }
-
 }
