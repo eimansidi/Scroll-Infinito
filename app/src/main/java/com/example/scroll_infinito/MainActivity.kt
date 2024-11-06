@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.graphics.Canvas
 import android.graphics.Color
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -24,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var etTask:EditText
     lateinit var rvTasks:RecyclerView
 
+    lateinit var mediaPlayer: MediaPlayer // Declarar el MediaPlayer para reproducir sonidos
+
     lateinit var adapter:TaskAdapter
 
     var tasks = mutableListOf<String>()
@@ -33,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initUi()
         attachSwipeToDelete()
+        mediaPlayer = MediaPlayer.create(this, R.raw.delete_sound)
     }
 
     private fun initUi() {
@@ -52,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         tasks.removeAt(position)
         adapter.notifyDataSetChanged()
         prefs.saveTasks(tasks)
+        mediaPlayer.start()
     }
 
     private fun initListeners() {
@@ -70,11 +75,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addTask() {
-        val taskToAdd:String = etTask.text.toString()
-        tasks.add(taskToAdd)
-        adapter.notifyDataSetChanged()
-        etTask.setText("")
-        prefs.saveTasks(tasks)
+        val taskToAdd: String = etTask.text.toString() // Obtener el texto de la tarea
+        if (taskToAdd.isNotEmpty()) { // Verificar que el campo no esté vacío
+            tasks.add(taskToAdd) // Añadir la nueva tarea a la lista
+            prefs.saveTasks(tasks) // Guardar la lista actualizada
+            adapter.notifyDataSetChanged() // Notificar al adaptador que los datos han cambiado
+            etTask.setText("") // Limpiar el campo de texto
+        }
     }
 
     private fun initView() {
@@ -164,6 +171,16 @@ class MainActivity : AppCompatActivity() {
 
         // Asocia el ItemTouchHelper al RecyclerView
         ItemTouchHelper(itemTouchHelper).attachToRecyclerView(rvTasks)
+    }
+
+    /**
+     * Se llama cuando la actividad se destruye.
+     * Libera los recursos utilizados por el MediaPlayer.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        // Liberar el MediaPlayer cuando la actividad se destruya
+        mediaPlayer.release()
     }
 
 }
